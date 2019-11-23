@@ -5,6 +5,7 @@ import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
 import '../screens/cart_screen.dart';
+import '../widgets/app_drawer.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -33,7 +34,8 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
               });
             },
             icon: Icon(Icons.more_vert),
-            itemBuilder: (_) => [
+            itemBuilder: (_) =>
+            [
               PopupMenuItem(
                 child: Text("Show Favorites"),
                 value: FilterOptions.Favorites,
@@ -45,10 +47,11 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
             ],
           ),
           Consumer<Cart>(
-            builder: (context, cart, ch) => Badge(
-              child: ch,
-              value: cart.itemsCount.toString(),
-            ),
+            builder: (context, cart, ch) =>
+                Badge(
+                  child: ch,
+                  value: cart.itemsCount.toString(),
+                ),
             child: IconButton(
               onPressed: () =>
                   Navigator.of(context).pushNamed(CartScreen.routeName),
@@ -58,6 +61,7 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
         ],
       ),
       body: ProductsGrid(_showFavorites),
+      drawer: AppDrawer(),
     );
   }
 }

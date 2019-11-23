@@ -3,14 +3,24 @@ import 'package:provider/provider.dart';
 
 import '../providers/orders.dart' show Orders;
 import '../widgets/order_item.dart';
+import '../widgets/app_drawer.dart';
 
-class OrdersItem extends StatelessWidget {
+class OrderScreen extends StatelessWidget {
+  static const routeName = "/orders-screen";
+
   @override
   Widget build(BuildContext context) {
     final ordersData = Provider.of<Orders>(context);
-    return ListView.builder(
-      itemBuilder: (context, index) => OrderItem(ordersData.orders[index]),
-      itemCount: ordersData.orders.length,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Your Orders"),
+      ),
+      body: ListView.builder(
+        itemBuilder: (context, index) => OrderItem(ordersData.orders[index]),
+        itemCount: ordersData.orders.length,
+      ),
+      drawer: AppDrawer(),
     );
+    ;
   }
 }
