@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
+import '../providers/products_provider.dart';
 
 class EditProductsScreen extends StatefulWidget {
   static const routeName = "/edit-products";
@@ -36,12 +38,22 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
 
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
+      if ((!_imageController.text.startsWith("http") &&
+          !_imageController.text.startsWith("https"))) {
+        return;
+      }
       setState(() {});
     }
   }
 
   void _saveForm() {
+    final _isValid = _formState.currentState.validate();
+
+    if (!_isValid) {
+      return;
+    }
     _formState.currentState.save();
+    Provider.of<ProductsProvider>(context).addProduct(_editingProduct);
   }
 
   @override
@@ -73,36 +85,65 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                       description: _editingProduct.description,
                       imageUrl: _editingProduct.imageUrl);
                 },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return "Please enter a valid title";
+                  }
+                  return null;
+                },
               ),
               TextFormField(
-                  decoration: InputDecoration(labelText: "Price"),
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.number,
-                  focusNode: _priceFocusNode,
-                  onFieldSubmitted: (_) {
-                    FocusScope.of(context).requestFocus(_descriptionFocusNode);
-                  },
-                  onSaved: (value) {
-                    _editingProduct = Product(
-                        id: _editingProduct.id,
-                        title: _editingProduct.title,
-                        price: double.parse(value),
-                        description: _editingProduct.description,
-                        imageUrl: _editingProduct.imageUrl);
-                  }),
+                decoration: InputDecoration(labelText: "Price"),
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.number,
+                focusNode: _priceFocusNode,
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).requestFocus(_descriptionFocusNode);
+                },
+                onSaved: (value) {
+                  _editingProduct = Product(
+                      id: _editingProduct.id,
+                      title: _editingProduct.title,
+                      price: double.parse(value),
+                      description: _editingProduct.description,
+                      imageUrl: _editingProduct.imageUrl);
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return "Please enter a price";
+                  }
+                  if (double.tryParse(value) == null) {
+                    return "Please enter a valid number.";
+                  }
+                  if (double.parse(value) <= 0) {
+                    return "Please enter a number greater than zero";
+                  }
+                  return null;
+                },
+              ),
               TextFormField(
-                  maxLines: 3,
-                  decoration: InputDecoration(labelText: "Description"),
-                  keyboardType: TextInputType.multiline,
-                  focusNode: _descriptionFocusNode,
-                  onSaved: (value) {
-                    _editingProduct = Product(
-                        id: _editingProduct.id,
-                        title: _editingProduct.title,
-                        price: _editingProduct.price,
-                        description: value,
-                        imageUrl: _editingProduct.imageUrl);
-                  }),
+                maxLines: 3,
+                decoration: InputDecoration(labelText: "Description"),
+                keyboardType: TextInputType.multiline,
+                focusNode: _descriptionFocusNode,
+                onSaved: (value) {
+                  _editingProduct = Product(
+                      id: _editingProduct.id,
+                      title: _editingProduct.title,
+                      price: _editingProduct.price,
+                      description: value,
+                      imageUrl: _editingProduct.imageUrl);
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return "Please enter some description.";
+                  }
+                  if (value.length < 10) {
+                    return "Please enter description longer than 10 characters";
+                  }
+                  return null;
+                },
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
@@ -137,6 +178,21 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                             price: _editingProduct.price,
                             description: _editingProduct.description,
                             imageUrl: value);
+                      },
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return "Please enter a image URL.";
+                        }
+                        if (!value.startsWith("http") &&
+                            !value.startsWith("https")) {
+                          return "Please enter a valid Url";
+                        }
+//                        if (!value.endsWith(".png") &&
+//                            !value.endsWith(".jpg") &&
+//                            !value.endsWith(".jpeg")) {
+//                          return "Please enter a valid image";
+//                        }
+                        return null;
                       },
                       onFieldSubmitted: (_) {
                         _saveForm();
