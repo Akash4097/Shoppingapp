@@ -54,7 +54,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) {
-    const url = "https://shoppingapp-e514f.firebaseio.com/products.json";
+    const url = "https://shoppingapp-e514f.firebaseio.com/products";
     return http
         .post(url,
             body: json.encode({
