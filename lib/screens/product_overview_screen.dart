@@ -6,6 +6,7 @@ import '../widgets/badge.dart';
 import '../providers/cart.dart';
 import '../screens/cart_screen.dart';
 import '../widgets/app_drawer.dart';
+import '../providers/products_provider.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -16,6 +17,28 @@ class ProductOverViewScreen extends StatefulWidget {
 
 class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
   var _showFavorites = false;
+  var _initState = true;
+  var _isLoading = false;
+
+  Future<void> _refreshProducts() async {
+    await Provider.of<ProductsProvider>(context).fetchProductsFromServer();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_initState) {
+      setState(() {
+        _isLoading = true;
+      });
+      _refreshProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _initState = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +57,7 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
               });
             },
             icon: Icon(Icons.more_vert),
-            itemBuilder: (_) =>
-            [
+            itemBuilder: (_) => [
               PopupMenuItem(
                 child: Text("Show Favorites"),
                 value: FilterOptions.Favorites,
@@ -47,11 +69,10 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
             ],
           ),
           Consumer<Cart>(
-            builder: (context, cart, ch) =>
-                Badge(
-                  child: ch,
-                  value: cart.itemsCount.toString(),
-                ),
+            builder: (context, cart, ch) => Badge(
+              child: ch,
+              value: cart.itemsCount.toString(),
+            ),
             child: IconButton(
               onPressed: () =>
                   Navigator.of(context).pushNamed(CartScreen.routeName),
@@ -60,7 +81,14 @@ class _ProductOverViewScreenState extends State<ProductOverViewScreen> {
           )
         ],
       ),
-      body: ProductsGrid(_showFavorites),
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProducts(),
+        child: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ProductsGrid(_showFavorites),
+      ),
       drawer: AppDrawer(),
     );
   }
