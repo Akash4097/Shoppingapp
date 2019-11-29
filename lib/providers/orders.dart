@@ -25,6 +25,38 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchOrdersData() async {
+    final url = "https://shoppingapp-e514f.firebaseio.com/order.json";
+    final response = await http.get(url);
+    final List<OrderItem> loadedOrders = [];
+    final extractedOrders = json.decode(response.body) as Map<String, dynamic>;
+
+    if (extractedOrders == null) {
+      return;
+    }
+    extractedOrders.forEach((orderId, orderData) {
+      loadedOrders.add(
+        OrderItem(
+          id: orderId,
+          amount: orderData['amount'],
+          dateTime: DateTime.parse(orderData['dateTime']),
+          products: (orderData['products'] as List<dynamic>)
+              .map(
+                (item) => CartItem(
+                  id: item['id'],
+                  price: item['price'],
+                  title: item['title'],
+                  quantity: item['quantity'],
+                ),
+              )
+              .toList(),
+        ),
+      );
+    });
+    _orders = loadedOrders.reversed.toList();
+    notifyListeners();
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url = "https://shoppingapp-e514f.firebaseio.com/order.json";
     final timeStamp = DateTime.now();
