@@ -27,7 +27,7 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
     'imageUrl': ''
   };
 
-  var _isLoding = false;
+  var _isLoading = false;
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
     }
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     final _isValid = _formState.currentState.validate();
 
     if (!_isValid) {
@@ -84,20 +84,17 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
     }
     _formState.currentState.save();
     setState(() {
-      _isLoding = true;
+      _isLoading = true;
     });
     if (_editingProduct.id != null) {
-      Provider.of<ProductsProvider>(context, listen: false)
+      await Provider.of<ProductsProvider>(context, listen: false)
           .updateProduct(_editingProduct.id, _editingProduct);
-      setState(() {
-        _isLoding = false;
-      });
-      Navigator.of(context).pop();
     } else {
-      Provider.of<ProductsProvider>(context, listen: false)
-          .addProduct(_editingProduct)
-          .catchError((error) {
-        return showDialog(
+      try {
+        await Provider.of<ProductsProvider>(context, listen: false)
+            .addProduct(_editingProduct);
+      } catch (error) {
+        await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text("An Error Occured!"),
@@ -110,13 +107,12 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
             ],
           ),
         );
-      }).then((_) {
-        setState(() {
-          _isLoding = false;
-        });
-        Navigator.of(context).pop();
-      });
+      }
     }
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
   }
 
   @override
@@ -128,7 +124,7 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
           IconButton(icon: Icon(Icons.save), onPressed: _saveForm)
         ],
       ),
-      body: _isLoding
+      body: _isLoading
           ? Center(
               child: CircularProgressIndicator(),
             )
