@@ -1,6 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -39,12 +40,10 @@ class AuthScreen extends StatelessWidget {
                 children: <Widget>[
                   Flexible(
                     child: Container(
-                      margin: EdgeInsets.only(bottom: 20.0),
+                      margin: EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 20.0),
                       padding:
                           EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
-                      transform: Matrix4.rotationZ(-8 * pi / 180)
-                        ..translate(-10.0),
-                      // ..translate(-10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.deepOrange.shade900,
@@ -60,8 +59,7 @@ class AuthScreen extends StatelessWidget {
                         'MyShop',
                         style: TextStyle(
                           color: Theme.of(context).accentTextTheme.title.color,
-                          fontSize: 50,
-                          fontFamily: 'Anton',
+                          fontSize: 34,
                           fontWeight: FontWeight.normal,
                         ),
                       ),
@@ -100,7 +98,7 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -111,8 +109,12 @@ class _AuthCardState extends State<AuthCard> {
     });
     if (_authMode == AuthMode.Login) {
       // Log user in
+      await Provider.of<Auth>(context, listen: false)
+          .login(_authData['email'], _authData['password']);
     } else {
       // Sign user up
+      await Provider.of<Auth>(context, listen: false)
+          .signup(_authData['email'], _authData['password']);
     }
     setState(() {
       _isLoading = false;

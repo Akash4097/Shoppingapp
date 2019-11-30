@@ -10,6 +10,8 @@ import './providers/orders.dart';
 import './screens/orders_screen.dart';
 import './screens/user_products_screen.dart';
 import './screens/edit_products_screen.dart';
+import './screens/auth_screen.dart';
+import './providers/auth.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,10 +22,17 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
+          value: Auth(),
+        ),
+        ChangeNotifierProvider.value(
           value: ProductsProvider(),
         ),
-        ChangeNotifierProvider.value(value: Cart()),
-        ChangeNotifierProvider.value(value: Orders())
+        ChangeNotifierProvider.value(
+          value: Cart(),
+        ),
+        ChangeNotifierProvider.value(
+          value: Orders(),
+        )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -38,7 +47,7 @@ class MyApp extends StatelessWidget {
             title: TextStyle(color: Colors.white),
           ),
         ),
-        home: ProductOverViewScreen(),
+        home: AuthScreen(),
         routes: {
           ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
           CartScreen.routeName: (ctx) => CartScreen(),
