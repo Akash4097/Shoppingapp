@@ -34,27 +34,29 @@ class MyApp extends StatelessWidget {
           value: Orders(),
         )
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'MyShop',
-        theme: ThemeData(
-          primarySwatch: Colors.lightBlue,
-          accentColor: Colors.deepOrange,
-          appBarTheme: AppBarTheme(
-            iconTheme: IconThemeData(color: Colors.white),
+      child: Consumer<Auth>(
+        builder: (ctx, auth, _) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'MyShop',
+          theme: ThemeData(
+            primarySwatch: Colors.lightBlue,
+            accentColor: Colors.deepOrange,
+            appBarTheme: AppBarTheme(
+              iconTheme: IconThemeData(color: Colors.white),
+            ),
+            primaryTextTheme: TextTheme(
+              title: TextStyle(color: Colors.white),
+            ),
           ),
-          primaryTextTheme: TextTheme(
-            title: TextStyle(color: Colors.white),
-          ),
+          home: auth.isAuth ? ProductOverViewScreen() : AuthScreen(),
+          routes: {
+            ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
+            CartScreen.routeName: (ctx) => CartScreen(),
+            OrderScreen.routeName: (ctx) => OrderScreen(),
+            UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
+            EditProductsScreen.routeName: (ctx) => EditProductsScreen()
+          },
         ),
-        home: AuthScreen(),
-        routes: {
-          ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
-          CartScreen.routeName: (ctx) => CartScreen(),
-          OrderScreen.routeName: (ctx) => OrderScreen(),
-          UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
-          EditProductsScreen.routeName: (ctx) => EditProductsScreen()
-        },
       ),
     );
   }
