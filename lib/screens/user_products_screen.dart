@@ -10,12 +10,13 @@ class UserProductsScreen extends StatelessWidget {
   static const routeName = "/user-products-screen";
 
   Future<void> _refreshProducts(BuildContext context) async {
-    await Provider.of<ProductsProvider>(context).fetchProductsFromServer();
+    await Provider.of<ProductsProvider>(context, listen: false)
+        .fetchProductsFromServer(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<ProductsProvider>(context);
+//    final productData = Provider.of<ProductsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Products"),
@@ -27,20 +28,30 @@ class UserProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _refreshProducts(context),
-        child: ListView.builder(
-          itemBuilder: (_, index) => Column(
-            children: <Widget>[
-              UserProductItem(
-                  productData.items[index].id,
-                  productData.items[index].title,
-                  productData.items[index].imageUrl),
-              Divider()
-            ],
-          ),
-          itemCount: productData.items.length,
-        ),
+      body: FutureBuilder(
+        future: _refreshProducts(context),
+        builder: (ctx, snapshots) =>
+            snapshots.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => _refreshProducts(context),
+                    child: Consumer<ProductsProvider>(
+                      builder: (ctx, productData, _) => ListView.builder(
+                        itemBuilder: (_, index) => Column(
+                          children: <Widget>[
+                            UserProductItem(
+                                productData.items[index].id,
+                                productData.items[index].title,
+                                productData.items[index].imageUrl),
+                            Divider()
+                          ],
+                        ),
+                        itemCount: productData.items.length,
+                      ),
+                    ),
+                  ),
       ),
       drawer: AppDrawer(),
     );
