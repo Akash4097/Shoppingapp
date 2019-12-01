@@ -26,7 +26,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Auth, ProductsProvider>(
           // ignore: deprecated_member_use
-          builder: (ctx, auth, previousProducts) => ProductsProvider(auth.token,
+          builder: (ctx, auth, previousProducts) => ProductsProvider(
+              auth.token,
+              auth.userId,
               previousProducts == null ? [] : previousProducts.items),
         ),
         ChangeNotifierProvider.value(
