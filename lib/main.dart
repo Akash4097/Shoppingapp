@@ -12,6 +12,7 @@ import './screens/user_products_screen.dart';
 import './screens/edit_products_screen.dart';
 import './screens/auth_screen.dart';
 import './providers/auth.dart';
+import './screens/splash_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,43 +27,55 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Auth, ProductsProvider>(
           // ignore: deprecated_member_use
-          builder: (ctx, auth, previousProducts) => ProductsProvider(
-              auth.token,
-              auth.userId,
-              previousProducts == null ? [] : previousProducts.items),
+          builder: (ctx, auth, previousProducts) =>
+              ProductsProvider(
+                  auth.token,
+                  auth.userId,
+                  previousProducts == null ? [] : previousProducts.items),
         ),
         ChangeNotifierProvider.value(
           value: Cart(),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
           // ignore: deprecated_member_use
-          builder: (ctx, auth, previousOrders) => Orders(auth.token,
-              auth.userId, previousOrders == null ? [] : previousOrders.orders),
+          builder: (ctx, auth, previousOrders) =>
+              Orders(auth.token,
+                  auth.userId,
+                  previousOrders == null ? [] : previousOrders.orders),
         )
       ],
       child: Consumer<Auth>(
-        builder: (ctx, auth, _) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'MyShop',
-          theme: ThemeData(
-            primarySwatch: Colors.lightBlue,
-            accentColor: Colors.deepOrange,
-            appBarTheme: AppBarTheme(
-              iconTheme: IconThemeData(color: Colors.white),
+        builder: (ctx, auth, _) =>
+            MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'MyShop',
+              theme: ThemeData(
+                primarySwatch: Colors.lightBlue,
+                accentColor: Colors.deepOrange,
+                appBarTheme: AppBarTheme(
+                  iconTheme: IconThemeData(color: Colors.white),
+                ),
+                primaryTextTheme: TextTheme(
+                  title: TextStyle(color: Colors.white),
+                ),
+              ),
+              home: auth.isAuth
+                  ? ProductOverViewScreen()
+                  : FutureBuilder(
+                future: auth.tryAutoLogin(),
+                builder: (ctx, authResultSnapShots) =>
+                authResultSnapShots.connectionState == ConnectionState.waiting
+                    ? SplashScreen()
+                    : AuthScreen(),
+              ),
+              routes: {
+                ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
+                CartScreen.routeName: (ctx) => CartScreen(),
+                OrderScreen.routeName: (ctx) => OrderScreen(),
+                UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
+                EditProductsScreen.routeName: (ctx) => EditProductsScreen()
+              },
             ),
-            primaryTextTheme: TextTheme(
-              title: TextStyle(color: Colors.white),
-            ),
-          ),
-          home: auth.isAuth ? ProductOverViewScreen() : AuthScreen(),
-          routes: {
-            ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
-            CartScreen.routeName: (ctx) => CartScreen(),
-            OrderScreen.routeName: (ctx) => OrderScreen(),
-            UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
-            EditProductsScreen.routeName: (ctx) => EditProductsScreen()
-          },
-        ),
       ),
     );
   }
